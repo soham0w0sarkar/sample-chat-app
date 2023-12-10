@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+</head>
+<body>
+
+    <div id="chat-container">
+        <div id="message-list">
+
+        </div>
+        <input type="text" id="message-input">
+        <button id="send-message">Send Message</button>
+    </div>
+
+    <script src="http://localhost:8080/socket.io/socket.io.js"></script>
+    <script>
+        //Socket Code in JS
+        const socket = io.connect('http://localhost:8080');
+
+        const username = prompt("Enter your name");
+        socket.emit("join",username);
+
+        //Get the elements
+        const messageInput = document.getElementById("message-input");
+        const messageList = document.getElementById("message-list");
+        const sendButton= document.getElementById("send-message");
+
+        sendButton.addEventListener('click',function(){
+            // Read the message from input element (message-input) and send it to server.
+            const message = messageInput.value;
+            if(message){
+                socket.emit('new_message',message);
+
+                //Add message to Message List (message-list).
+                const messageElement = document.createElement("div");
+                messageElement.innerText =username + ":" + message;
+                messageList.appendChild(messageElement);
+                messageInput.value = '';
+            }
+
+        });
+
+         //Listen to broadcast message and add it to the message list.
+         socket.on('broadcast_message',(userMessage)=>{
+                const messageElement = document.createElement("div");
+                messageElement.innerText = userMessage.username + ":" +userMessage.message;
+                messageList.appendChild(messageElement);
+        })
+
+
+    </script>
+</body>
+</html>
